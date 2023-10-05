@@ -1,0 +1,103 @@
+####################################################################################
+#                                  Server                                          #
+####################################################################################
+server:
+  port: 5656
+  servlet:
+    context-path: /demo-server
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  error:
+    path: /error
+    # always | never | on_param
+    include-stacktrace: never
+    whitelabel.enabled: false
+jwt:
+  token:
+    secret: dm?pj?sv
+
+# jasypt 암호화
+jasypt:
+  encryptor:
+    bean: standardPBEStringEncryptor
+
+#### Custom 속성 ####
+# 버전정보
+custom:
+  title: DEMO
+  version: 1.0.0
+####################################################################################
+#                                    DEFAULT                                       #
+####################################################################################
+spring:
+  main:
+    # 스프링 bean 오버라이드 허용
+    allow-bean-definition-overriding: true
+  profiles:
+    active: loc
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      naming:
+        # [물리] 스네이크 -> 카멜 케이스로 변경
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        # [논리]
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    # JPA 실행 쿼리 표시
+    show-sql: true
+    properties:
+      hibernate:
+        # 쿼리를 가독성 있게 표시
+        format_sql: true
+        # laze loading 전략 사용
+        enable_lazy_load_no_trans: true
+  # 세션 설정
+  session:
+    store-type: jdbc
+
+  # 캐시 설정
+  cache:
+    type: redis
+  # redis 설정
+  redis:
+    host: localhost
+    port: 6379
+
+---
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+####################################################################################
+#                                    LOC                                           #
+####################################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring:
+  config:
+    activate:
+      on-profile: loc
+  datasource:
+    hikari:
+      pool-name: hikari-cp
+      maximum-pool-size: 30
+      minimum-idle: 2
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+    url: jdbc:mysql://localhost:3306/demo?serverTimezone=UTC&useLegacyDatetimeCode=false&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: ENC(5/4lNCUd+tir2BEFyDxFyg==)
+  jpa:
+    hibernate:
+      # create | create-drop | none | update | validate
+      ddl-auto: create
+  sql:
+    init:
+      # always | embedded | never
+      mode: embedded
+      data-locations: classpath:import.sql
